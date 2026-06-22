@@ -1,0 +1,15 @@
+[workspace]
+members = [
+    "zerec",
+    "zerec-derive",
+]
+resolver = "3"
+
+[workspace.package]
+version      = "0.1.0"
+edition      = "2024"
+authors      = ["Ceyhun"]
+license      = "MIT OR Apache-2.0"
+repository   = "https://github.com/egare0/zerec"
+keywords     = ["serialization", "binary", "encoding", "zero-copy", "no-std"]
+categories   = ["encoding", "no-std"]

@@ -1,0 +1,18 @@
+[package]
+name = "zerec"
+description = "Minimal zero-copy binary codec for Rust."
+readme = "../README.md"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[features]
+default = []
+derive = ["dep:zerec-derive"]
+
+[dependencies]
+zerec-derive = { path = "../zerec-derive", version = "0.1.0", optional = true }
