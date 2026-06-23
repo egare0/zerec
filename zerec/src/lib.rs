@@ -5,3 +5,4 @@ pub mod codec;
 pub mod impls;
 pub mod zero_copy;
 pub mod adapter;
+pub mod integrations;
