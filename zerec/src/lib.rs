@@ -3,3 +3,4 @@ pub mod encoder;
 pub mod decoder;
 pub mod codec;
 pub mod impls;
+pub mod zero_copy;
