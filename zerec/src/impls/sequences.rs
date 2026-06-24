@@ -27,6 +27,8 @@ impl<T: Encode> Encode for Vec<T> {
 
 impl<T: Decode> Decode for Vec<T> {
     fn decode(dec: &mut BufDecoder<'_>) -> Result<Self, DecodeError> {
+        dec.enter()?;
+
         let len = dec.read_u32()?;
 
         if len > COLLECTION_LIMIT {
@@ -39,6 +41,7 @@ impl<T: Decode> Decode for Vec<T> {
             out.push(T::decode(dec)?);
         }
 
+        dec.leave();
         Ok(out)
     }
 }
