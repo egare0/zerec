@@ -1,5 +1,3 @@
-> `derive` feature is not yet available — coming in v0.2.0.
-
 # zerec
 
 Minimal zero-copy binary codec for Rust.
@@ -10,14 +8,14 @@ No schema files. No runtime reflection. No type tags on the wire. Just bytes.
 
 ```toml
 [dependencies]
-zerec = { version = "0.1", features = ["derive"] }
+zerec = { version = "0.2", features = ["derive"] }
 ```
 
 ```rust
 use zerec::{Encode, Decode, codec::{to_bytes, from_bytes}};
 
 #[derive(Encode, Decode, Debug, PartialEq)]
-struct Bullet { 
+struct Bullet {
     origin: [f32; 3],
     speed:  f32,
     damage: u32,
@@ -58,7 +56,7 @@ Tag-free, little-endian, tightly packed. No padding, no alignment waste.
 
 Field order is the contract. Adding or reordering fields is a breaking change.
 
-## Field attributes (v0.2.0)
+## Field attributes
 
 ```rust
 #[derive(Encode, Decode)]
@@ -67,25 +65,25 @@ struct Example {
     #[zerec(skip)]
     cache: u64,
 
-    // Route through an Adapter for foreign types (orphan rule workaround).
+    // Route through an Adapter for foreign types.
     #[zerec(via = "RigidBodyAdapter")]
     body: RigidBody,
 
-    // Inline closures for lightweight conversions.
+    // Inline closures for quick conversions.
     #[zerec(
-        map_enc = "|v: &glam::Vec3| [v.x, v.y, v.z]",
+        map_enc = "|v: &[f32; 3]| *v",
         map_dec = "|dec| {
             let a: [f32; 3] = zerec::Decode::decode(dec)?;
-            Ok(glam::Vec3::from_array(a))
+            Ok(a)
         }"
     )]
-    position: glam::Vec3,
+    position: [f32; 3],
 }
 ```
 
 ## Adapter pattern
 
-For types, you don't own:
+For types you don't own:
 
 ```rust
 use zerec::Adapter;
@@ -94,15 +92,15 @@ struct RigidBody { mass: f32, vel: [f32; 3] }
 struct RigidBodyAdapter;
 
 impl Adapter<RigidBody> for RigidBodyAdapter {
-type Repr = (f32, [f32; 3]);
-fn to_repr(v: &RigidBody) -> Self::Repr { (v.mass, v.vel) }
-fn from_repr(r: Self::Repr) -> RigidBody { RigidBody { mass: r.0, vel: r.1 } }
+    type Repr = (f32, [f32; 3]);
+    fn to_repr(v: &RigidBody) -> Self::Repr { (v.mass, v.vel) }
+    fn from_repr(r: Self::Repr) -> RigidBody { RigidBody { mass: r.0, vel: r.1 } }
 }
 ```
 
 ## Zero-copy reads
 
-Borrow `&str` and `&[u8]` straight from the source buffer:
+Borrow `&str` and `&[u8]` straight from the source buffer, no allocation:
 
 ```rust
 use zerec::{ZeroBuf, decoder::BufDecoder};
@@ -110,6 +108,34 @@ use zerec::{ZeroBuf, decoder::BufDecoder};
 fn main() {
     let mut dec = BufDecoder::new(&bytes);
     let name: &str = ZeroBuf::decode_borrowed(&mut dec).unwrap();
+}
+```
+
+## Without derive
+
+Manual impl if you need fine-grained control:
+
+```rust
+use zerec::{Encode, Decode, encoder::BufEncoder, decoder::BufDecoder, error::DecodeError};
+
+struct Color { r: u8, g: u8, b: u8 }
+
+impl Encode for Color {
+    fn encode(&self, enc: &mut BufEncoder) {
+        self.r.encode(enc);
+        self.g.encode(enc);
+        self.b.encode(enc);
+    }
+}
+
+impl Decode for Color {
+    fn decode(dec: &mut BufDecoder<'_>) -> Result<Self, DecodeError> {
+        Ok(Self {
+            r: u8::decode(dec)?,
+            g: u8::decode(dec)?,
+            b: u8::decode(dec)?,
+        })
+    }
 }
 ```
 
