@@ -18,7 +18,7 @@ const COLLECTION_LIMIT: u32 = 64_000_000;
 impl<T: Encode> Encode for Vec<T> {
     /// Wire layout: `u32` element count, then each element in order.
     fn encode(&self, enc: &mut BufEncoder) {
-        enc.write_u32(self.len() as u32);
+        enc.write_u32(u32::try_from(self.len()).expect("Vec length exceeds u32::MAX"));
         for item in self {
             item.encode(enc);
         }

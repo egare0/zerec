@@ -15,7 +15,7 @@ impl Encode for String {
     /// Wire layout: `u32` byte length, then raw UTF-8 bytes.
     fn encode(&self, enc: &mut BufEncoder) {
         let b = self.as_bytes();
-        enc.write_u32(b.len() as u32);
+        enc.write_u32(u32::try_from(b.len()).expect("String byte length exceeds u32::MAX"));
         enc.write_bytes(b);
     }
 }
