@@ -5,6 +5,7 @@
 //! read is checked and surfaces a typed error instead of panicking.
 
 /// Every way a decode operation can fail.
+#[non_exhaustive]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DecodeError {
     /// The buffer ran out of bytes before the value was fully decoded.
