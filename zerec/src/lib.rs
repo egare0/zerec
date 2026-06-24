@@ -11,7 +11,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! zerec = { version = "0.1", features = ["derive"] }
+//! zerec = { version = "0.2", features = ["derive"] }
 //! ```
 //!
 //! ```rust,ignore
