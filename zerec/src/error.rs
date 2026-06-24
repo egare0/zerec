@@ -37,6 +37,12 @@ pub enum DecodeError {
 
     /// An enum variant index had no matching variant in the type.
     UnknownVariant(u32),
+
+    /// Encoded data exceeds the maximum collection nesting depth.
+    ///
+    /// Prevents stack overflow from adversarially crafted deeply nested
+    /// collection types (e.g. `Vec<Tree>` where `Tree` contains `Vec<Tree>`).
+    NestingTooDeep,
 }
 
 impl core::fmt::Display for DecodeError {
@@ -47,7 +53,8 @@ impl core::fmt::Display for DecodeError {
             Self::InvalidChar(c) => write!(f, "invalid character: U+{c:04X}"),
             Self::InvalidUtf8 => write!(f, "invalid UTF-8 in string field"),
             Self::CollectionTooLarge { len, limit } => write!(f, "collection length {len} exceeds safety limit {limit}"),
-            Self::UnknownVariant(idx) => write!(f, "unknown variant index: {idx}")
+            Self::UnknownVariant(idx) => write!(f, "unknown variant index: {idx}"),
+            Self::NestingTooDeep => write!(f, "collection nesting depth exceeded the safety limit")
         }
     }
 }

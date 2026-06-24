@@ -2,6 +2,12 @@
 
 use crate::error::DecodeError;
 
+/// Maximum nesting depth for collection types during decode.
+///
+/// Prevents stack overflow from adversarially crafted deeply nested
+/// structures. 64 levels is far deeper than any real-world data.
+pub const MAX_DECODE_DEPTH: u32 = 64;
+
 /// A read-only cursor over a borrowed byte slice used during decoding.
 ///
 /// `BufDecoder` advances an internal position as bytes are consumed.
@@ -24,13 +30,14 @@ use crate::error::DecodeError;
 pub struct BufDecoder<'buf> {
     buf: &'buf [u8],
     pos: usize,
+    depth: u32,
 }
 
 impl<'buf> BufDecoder<'buf> {
     /// Creates a decoder starting at byte 0 of `buf`.
     #[inline]
     pub fn new(buf: &'buf [u8]) -> Self {
-        Self { buf, pos: 0}
+        Self { buf, pos: 0, depth: 0 }
     }
 
     /// Number of bytes consumed so far.
@@ -86,5 +93,32 @@ impl<'buf> BufDecoder<'buf> {
     pub fn read_u64(&mut self) -> Result<u64, DecodeError> {
         let b = self.read_bytes(8)?;
         Ok(u64::from_le_bytes([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]]))
+    }
+
+    /// Increments the nesting depth counter.
+    ///
+    /// Call this at the start of any [`Decode`] impl that dynamically
+    /// decodes a variable number of inner values (e.g. `Vec<T>`).
+    /// Always pair with [`Self::leave`] on the success path.
+    ///
+    /// Returns [`DecodeError::NestingTooDeep`] if the limit is exceeded.
+    /// On error paths inside the guarded region, `leave` need not be
+    /// called — a failed decode cannot be meaningfully continued.
+    #[inline]
+    pub fn enter(&mut self) -> Result<(), DecodeError> {
+        if self.depth >= MAX_DECODE_DEPTH {
+            return Err(DecodeError::NestingTooDeep);
+        }
+
+        self.depth += 1;
+
+        Ok(())
+    }
+
+    /// Decrements the nesting depth counter. Pair with [`Self::enter`].
+    #[inline]
+    pub fn leave(&mut self) {
+        debug_assert!(self.depth > 0, "leave() called without matching enter()");
+        self.depth = self.depth.saturating_sub(1);
     }
 }
