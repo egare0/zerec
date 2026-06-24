@@ -19,6 +19,7 @@
 /// let bytes = enc.finish();
 /// assert_eq!(&bytes[..4], &42u32.to_le_bytes());
 /// ```
+#[derive(Default)]
 pub struct BufEncoder {
     buf: Vec<u8>
 }
@@ -88,11 +89,5 @@ impl BufEncoder {
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.buf.is_empty()
-    }
-}
-
-impl Default for BufEncoder {
-    fn default() -> Self {
-        Self::new()
     }
 }
