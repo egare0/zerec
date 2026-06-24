@@ -224,3 +224,36 @@ fn invalid_utf8() {
     let result = from_bytes::<String>(&bytes);
     assert!(matches!(result, Err(zerec::DecodeError::InvalidUtf8)));
 }
+
+// ── depth limit ───────────────────────────────────────────────────────────
+
+#[test]
+fn decoder_enter_at_limit() {
+    let mut dec = zerec::decoder::BufDecoder::new(&[]);
+    for _ in 0..64 {
+        dec.enter().expect("should succeed within limit");
+    }
+    assert!(matches!(dec.enter(), Err(zerec::DecodeError::NestingTooDeep)));
+}
+
+#[test]
+fn decoder_leave_restores_depth() {
+    let mut dec = zerec::decoder::BufDecoder::new(&[]);
+    for _ in 0..64 {
+        dec.enter().unwrap();
+    }
+
+    assert!(dec.enter().is_err());
+
+    dec.leave();
+    dec.enter().expect("should succeed after leave");
+}
+
+#[test]
+fn roundtrip_vec_triple_nested() {
+    let v: Vec<Vec<Vec<u8>>> = vec![
+        vec![vec![1, 2, 3], vec![4]],
+        vec![vec![5, 6]],
+    ];
+    assert_eq!(from_bytes::<Vec<Vec<Vec<u8>>>>(&to_bytes(&v)).unwrap(), v);
+}
