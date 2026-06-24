@@ -16,5 +16,14 @@ derive = ["dep:zerec-derive"]
 glam = ["dep:glam"]
 
 [dependencies]
-zerec-derive = { path = "../zerec-derive", version = "0.1.0", optional = true }
+zerec-derive = { path = "../zerec-derive", version = "0.2.0", optional = true }
 glam = { version = "0.33", default-features = false, optional = true }
+
+[[test]]
+name = "codec"
+path = "tests/codec.rs"
+
+[[test]]
+name = "derive"
+path = "tests/derive.rs"
+required-features = ["derive"]
