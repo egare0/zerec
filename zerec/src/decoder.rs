@@ -85,6 +85,6 @@ impl<'buf> BufDecoder<'buf> {
     #[inline]
     pub fn read_u64(&mut self) -> Result<u64, DecodeError> {
         let b = self.read_bytes(8)?;
-        Ok(u64::from_le_bytes(b.try_into().unwrap()))
+        Ok(u64::from_le_bytes([b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7]]))
     }
 }
