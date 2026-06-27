@@ -35,6 +35,13 @@ fn main() {
 | `derive` | `#[derive(Encode, Decode)]` proc macros            |
 | `glam`   | Encode/Decode for `glam::Vec2/3/4`, `Quat`, `Mat4` |
 
+## no_std
+
+zerec works in `no_std + alloc` environments. Register a global
+allocator and it just works — no feature flags needed.
+
+`std` is not required; `alloc` is.
+
 ## Wire format (ZRC)
 
 Tag-free, little-endian, tightly packed. No padding, no alignment waste.
