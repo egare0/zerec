@@ -6,7 +6,7 @@ Planned work for upcoming zerec releases.
 
 Core codec. `BufEncoder`, `BufDecoder`, `Encode`, `Decode`, `ZeroBuf`, `Adapter`, `glam` feature.
 
-## v0.2.0 (current)
+## v0.2.0 (released)
 
 `zerec-derive` crate gets its first real implementation.
 `#[derive(Encode, Decode)]` for structs and enums.
@@ -17,7 +17,7 @@ Field attributes:
 
 Integration test suite.
 
-## v0.3.0 — no_std
+## v0.3.0 (current)
 
 Drop the `std` requirement, support `no_std + alloc`.
 `COLLECTION_LIMIT` becomes configurable instead of a hardcoded constant.
