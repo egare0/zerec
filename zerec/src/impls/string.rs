@@ -7,9 +7,6 @@ use crate::{
     error::DecodeError
 };
 
-/// Maximum byte length for a single string during decode (64 MiB).
-const STRING_LIMIT: u32 = 64 * 1024 * 1024;
-
 // ── String ────────────────────────────────────────────────────────────────
 impl Encode for String {
     /// Wire layout: `u32` byte length, then raw UTF-8 bytes.
@@ -23,9 +20,10 @@ impl Encode for String {
 impl Decode for String {
     fn decode(dec: &mut BufDecoder<'_>) -> Result<Self, DecodeError> {
         let len = dec.read_u32()?;
+        let limit = dec.collection_limit();
 
-        if len > STRING_LIMIT {
-            return Err(DecodeError::CollectionTooLarge { len, limit: STRING_LIMIT });
+        if len > limit {
+            return Err(DecodeError::CollectionTooLarge { len, limit });
         }
 
         let bytes = dec.read_bytes(len as usize)?;

@@ -8,6 +8,13 @@ use crate::error::DecodeError;
 /// structures. 64 levels is far deeper than any real-world data.
 pub const MAX_DECODE_DEPTH: u32 = 64;
 
+/// Default maximum element/byte count allowed in a single collection or string .
+///
+/// This limit exists to prevent adversarial inputs from triggering large
+/// allocations before any data is actually validated. Can be overridden
+/// per-decoder with [`BufDecoder::with_collection_limit`].
+pub const DEFAULT_COLLECTION_LIMIT: u32 = 64_000_000;
+
 /// A read-only cursor over a borrowed byte slice used during decoding.
 ///
 /// `BufDecoder` advances an internal position as bytes are consumed.
@@ -31,13 +38,38 @@ pub struct BufDecoder<'buf> {
     buf: &'buf [u8],
     pos: usize,
     depth: u32,
+    collection_limit: u32,
 }
 
 impl<'buf> BufDecoder<'buf> {
     /// Creates a decoder starting at byte 0 of `buf`.
+    ///
+    /// The collection limit defaults to [`DEFAULT_COLLECTION_LIMIT`].
     #[inline]
     pub fn new(buf: &'buf [u8]) -> Self {
-        Self { buf, pos: 0, depth: 0 }
+        Self { buf, pos: 0, depth: 0, collection_limit: DEFAULT_COLLECTION_LIMIT }
+    }
+
+    /// Sets a custom collection limit and returns the decoder.
+    ///
+    /// The limit applies to `Vec`, `String`, and any other variable-length
+    /// type decoded through this decoder instance.
+    ///
+    /// ```rust
+    /// use zerec::decoder::BufDecoder;
+    ///
+    /// let mut dec = BufDecoder::new(&[]).with_collection_limit(1024);
+    /// ```
+    #[inline]
+    pub fn with_collection_limit(mut self, limit: u32) -> Self {
+        self.collection_limit = limit;
+        self
+    }
+
+    /// Returns the active collection limit for this decoder.
+    #[inline]
+    pub fn collection_limit(&self) -> u32 {
+        self.collection_limit
     }
 
     /// Number of bytes consumed so far.

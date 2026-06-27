@@ -7,12 +7,6 @@ use crate::{
     error::DecodeError
 };
 
-/// Maximum element count for collections during decode.
-///
-/// Prevents adversarial inputs from causing large allocations before
-/// any data is actually validated. 64 million elements.
-const COLLECTION_LIMIT: u32 = 64_000_000;
-
 // ── Vec<T> ────────────────────────────────────────────────────────────────
 
 impl<T: Encode> Encode for Vec<T> {
@@ -30,12 +24,16 @@ impl<T: Decode> Decode for Vec<T> {
         dec.enter()?;
 
         let len = dec.read_u32()?;
+        let limit = dec.collection_limit();
 
-        if len > COLLECTION_LIMIT {
-            return Err(DecodeError::CollectionTooLarge { len, limit: COLLECTION_LIMIT });
+        if len > limit {
+            return Err(DecodeError::CollectionTooLarge { len, limit })
         }
 
-        let mut out = Vec::with_capacity(len as usize);
+        // Start small and grow as elements arrive rather than allocating
+        // the full requested capacity upfront. Limits the damage from
+        // large but otherwise valid length prefixes.
+        let mut out = Vec::with_capacity((len as usize).min(1024));
 
         for _ in 0..len {
             out.push(T::decode(dec)?);
