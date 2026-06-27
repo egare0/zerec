@@ -8,7 +8,7 @@ No schema files. No runtime reflection. No type tags on the wire. Just bytes.
 
 ```toml
 [dependencies]
-zerec = { version = "0.2", features = ["derive"] }
+zerec = { version = "0.3", features = ["derive"] }
 ```
 
 ```rust
