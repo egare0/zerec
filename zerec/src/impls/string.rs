@@ -1,5 +1,7 @@
 //! Encode + Decode for string types.
 
+use alloc::string::String;
+use alloc::borrow::ToOwned;
 use crate::{
     codec::{Decode, Encode},
     decoder::BufDecoder,

@@ -11,7 +11,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! zerec = { version = "0.2", features = ["derive"] }
+//! zerec = { version = "0.3", features = ["derive"] }
 //! ```
 //!
 //! ```rust,ignore
@@ -40,6 +40,9 @@
 //! |---------|----------------|
 //! | `derive` | `#[derive(Encode, Decode)]` via `zerec-derive` |
 //! | `glam`   | Encode/Decode for `glam::Vec2/3/4`, `Quat`, `Mat4` |
+
+#![no_std]
+extern crate alloc;
 
 pub mod error;
 pub mod encoder;

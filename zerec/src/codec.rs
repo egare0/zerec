@@ -1,5 +1,6 @@
 //! Core `Encode` and `Decode` traits, plus top-level convenience functions.
 
+use alloc::vec::Vec;
 use crate::{decoder::BufDecoder, encoder::BufEncoder, error::DecodeError};
 
 /// Writes a value into a [`BufEncoder`].

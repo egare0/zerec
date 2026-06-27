@@ -1,5 +1,6 @@
 //! Encode + Decode for sequential collection types.
 
+use alloc::vec::Vec;
 use crate::{
     codec::{Decode, Encode},
     decoder::BufDecoder,

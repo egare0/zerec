@@ -1,5 +1,7 @@
 //! Write-side of the ZRC wire format.
 
+use alloc::vec::Vec;
+
 /// A write-only byte buffer used during encoding.
 ///
 /// All [`crate::Encode`] implementations write through this type.
